@@ -33,3 +33,15 @@ GOOGLE_SHEET_IDS=<ваш-sheet-id-1>,<ваш-sheet-id-2>
 GOOGLE_SHEET_TAB=stocks_coefs
 GOOGLE_SERVICE_ACCOUNT_CREDENTIALS=./credentials.json
 ```
+
+### 3. Запуск
+
+```bash
+docker compose up --build
+```
+
+Для остановки сервиса:
+
+```bash
+docker compose down --rmi local --volumes
+```
