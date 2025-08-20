@@ -1,24 +1,39 @@
-# your node version
-FROM node:20-alpine AS deps-prod
+# Stage 1: Builder - Install everything and build
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-COPY ./package*.json .
+# Copy package files
+COPY package*.json ./
 
-RUN npm install --omit=dev
+# Install ALL dependencies (dev + prod)
+RUN npm install
 
-FROM deps-prod AS build
-
-RUN npm install --include=dev
-
+# Copy source code
 COPY . .
 
+# Build the application
 RUN npm run build
 
-FROM node:20-alpine AS prod
+# Stage 2: Production - Clean and optimized
+FROM node:20-alpine AS production
 
 WORKDIR /app
 
-COPY --from=build /app/package*.json .
-COPY --from=deps-prod /app/node_modules ./node_modules
-COPY --from=build /app/dist ./dist
+# Copy package files
+COPY package*.json ./
+
+# Install ONLY production dependencies
+RUN npm install --only=production && npm cache clean --force
+
+# Copy built application from builder stage
+COPY --from=builder /app/dist ./dist
+
+# Copy source files (for migrations etc.)
+COPY --from=builder /app/src ./src
+
+# Copy credentials file if it exists
+COPY --from=builder /app/credentials.json ./credentials.json
+
+# Start the application
+CMD ["npm", "run", "start"]

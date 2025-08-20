@@ -14,7 +14,7 @@ services:
   postgres:
     container_name: postgres
 
-    image: postgres:16.1-alpine
+    image: postgres:15
 
     environment:
       - PGPORT=${POSTGRES_PORT}
@@ -33,7 +33,7 @@ services:
       - ${POSTGRES_PORT}
 
     ports:
-      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+      - ${POSTGRES_PORT_EXPOSED}:${POSTGRES_PORT}
 
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
@@ -52,14 +52,8 @@ services:
       context: .
       dockerfile: Dockerfile
 
-    environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      PORT: ${APP_PORT}
-      NODE_ENV: production
+    env_file:
+      - .env
 
     ports:
       - ${APP_PORT}:${APP_PORT}
